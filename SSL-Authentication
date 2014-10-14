@@ -1,0 +1,20 @@
+SSL Authentication using Public/Private Keys:
+
+1. Generate certificates one for client authentication and one for the server authentication:
+
+	openssl pkcs12 -export -nodes  -passout pass: -out server.pfx -inkey server.key -in server.crt (c# server loads pfx certificate)
+
+	To create a new certificate: 
+	openssl req -new -x509 -nodes -days 3650 -subj "/C=US/ST=CA/L=SanJose/CN=mantri.com" -newkey rsa:2048 -keyout private.key -out client.cer
+
+
+2. Client connects to the server via socket that is wrapped in SSL layer.
+	import socket, ssl
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	ssl_sock = ssl.wrap_socket(sock, certfile=client.cer, keyfile=private.key)
+	server_address = (server_ip, server_port)
+	ssl_sock.connect(server_address)
+	ssl_sock.readline(count_bytes)
+
+3. The server accepts the client request, and validates client certificate. The certificate is validated against a list of authorized certs.
+   

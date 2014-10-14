@@ -1,0 +1,12 @@
+1. Server has all authorized clients' public keys in authorized_keys file.
+
+2. Client connects to server and presents its public key.
+
+3. Server sees the public key and if it is not in the authorized_keys file, does a password based authentication.
+
+4. If client's public key is in the authorized_keys file, the server creates some random text, encrypts it with the
+   client's public key and sends it to the client.
+
+5. The client has to decrypt the random text (using its private key) and send its hash to the server.
+
+6. If the hash is right, the server authenticates the client.
