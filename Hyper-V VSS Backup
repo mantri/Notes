@@ -1,0 +1,31 @@
+Hyper-V uses Volume ShadowCopy Service (VSS) for backups. 
+
+Terminology:
+-----------------
+
+Microsoft Volume Shadow copy Service (VSS) is a built-in Windows framework which enables creation of consistent snapshots of application data for VSS aware applications such as Exchange, SQL, etc.
+
+Microsoft VSS Requester is any application (backup software such as Veeam, Commvalut) that uses the VSS API to request the services of the Volume Shadow Copy Service to create and manage shadow copies of one or more volumes.
+
+Microsoft VSS Writers are applications or services that store persistent information in files on disk and that provide the names and locations of these files to requesters by using the shadow copy interface.
+
+Microsoft VSS Provider manages data volumes and creates the shadow copies of them on demand. Nutanix provides this VSS provider (FSRVP : File Server Remote VSS protocol) for its SMB implementation. 
+
+
+Here are the steps involved when using a backup software such as Veeam/Commvalut:
+________________________________________________________________________________
+
+1. The backup software (VSS requestor) requests the VSS running on the Hyper-V host to take a shadow copy of a volume (an SMB share/Container). Apparently, this is not VM-level for now.
+2. The VSS provider on the Hyper-V host receives this request and forwards it to all the VSS Writers using this share (1 Writer per VM). 
+    These writers forward the request to VSS running in the guest VM via integration service (only for Window VMs).
+3. The VSS on the guest quiesces IO and takes a Hyper-V snapshot/checkpoint. This will create AVHD/AVHDX (delta disks) for each associated  
+    VHD/VHDX. All new writes go to these files. This phase is called 'Internal Snapshot'.
+4. Once the internal snapshot is complete for all the VMs, the VSS provider on the Hyper-V host requests a shadow copy of the whole 
+   share/volume by sending FSRVP messages to our smb-adapter in Stargate. The FSRVP implementation enumerates all the VM files in the 
+   share and takes snapshots of the corresponding Nutanix vdisks. This is called 'External Snapshot'.
+5. After the external snapshot is complete, the VSS provider on the host merges the snapshotted VHD/VHDX files with their corresponding 
+   AVHD/AVHDX files.
+6. The VSS on the Hyper-V host informs the backup software about the path to the shadow copy on the SMB share. 
+7. The backup software reads the shadow copy into its own repository. 
+8. After the copy is complete, the backup software tells the VSS on Hyper-V host to delete the shadow copy.
+9. The host then deletes the shadow copy from the share
