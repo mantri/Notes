@@ -1,0 +1,3 @@
+To delete a directory with large number of files:
+  1. mkdir empty_dir
+  2. rsync empty_dir dir_to_delete
