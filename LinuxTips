@@ -1,3 +1,14 @@
 To delete a directory with large number of files:
   1. mkdir empty_dir
   2. rsync empty_dir dir_to_delete
+  
+  
+Remove Passphrase from SSL private key (id_rsa):
+  1. openssl rsa -in ~/.ssh/id_rsa -out ~/.ssh/id_rsa_new
+    (Enter passphrase for id_rsa)
+  2. cp ~/.ssh/id_rsa ~/.ssh/id_rsa.backup
+  3. mv ~/.ssh/id_rsa_new ~/.ssh/id_rsa
+  4. chmod 400 ~/.ssh/id_rsa
+
+  Test ssh to a machine that has your public key (id_rsa.pub) and you
+  should not see any passphrase prompt.
