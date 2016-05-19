@@ -3,7 +3,23 @@ To delete a directory with large number of files:
   2. rsync empty_dir dir_to_delete
   
   
+Specify which private key to use for github:
+============================================
+
+  chmod 400 ~/.ssh/id_rsa_github
+  
+  In ~/.ssh/config, add:
+
+  host github.com
+   HostName github.com
+   IdentityFile ~/.ssh/id_rsa_github
+   User git
+
+  git clone git@github.com:username/repo.git.
+
+  
 Remove Passphrase from SSL private key (id_rsa):
+================================================
   1. openssl rsa -in ~/.ssh/id_rsa -out ~/.ssh/id_rsa_new
     (Enter passphrase for id_rsa)
   2. cp ~/.ssh/id_rsa ~/.ssh/id_rsa.backup
